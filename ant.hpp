@@ -3,13 +3,16 @@
 
 #include <set>
 #include <utility>
+#include <ostream>
+
+using Coord = int;
+using Pos = std::pair<Coord, Coord>;
+using Trail = std::set<Pos>;
+
+std::ostream& operator<<(std::ostream& os, const Trail& trail);
 
 class Ant {
 public:
-    using Coord = int;
-    using Pos = std::pair<Coord, Coord>;
-    using Trail = std::set<Pos>;
-
     enum Dir { N, E, S, W };
 
     static Coord norm_x(Coord x);

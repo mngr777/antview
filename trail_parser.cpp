@@ -15,6 +15,17 @@ TrailParser::TrailParser() {
     reset();
 }
 
+std::string::size_type TrailParser::parse(const std::string& s) {
+    std::string::size_type pos = 0;
+    for (; pos < s.size(); ++ pos) {
+        consume(s[pos]);
+        if (is_done() || is_error())
+            break;
+    }
+    finish();
+    return pos;
+}
+
 void TrailParser::consume(const char c) {
     if (state_ == StateError) {
         return;
@@ -45,6 +56,48 @@ void TrailParser::finish() {
 
 }
 
+std::string TrailParser::state_string() const {
+    switch (state_) {
+        case StateReady:
+            return "Ready";
+        case StateError:
+            return "Error";
+        case StateDone:
+            return "Done";
+        case StateExpectItemOrTrailEnd:
+            return "Expecting next position item or end of trail";
+        case StateExpectNumber:
+            return "Expecting coordinate number";
+        case StateNumber:
+            return "Reading coordinate number";
+        case StateExpectItemEnd:
+            return "Expecting end of position item";
+        default:
+            assert(false && "Undefined state");
+    }
+}
+
+std::string TrailParser::error_message() const {
+    switch (error_) {
+        case ErrorOk:
+            return "Ok";
+        case ErrorUnrecognizedSymbol:
+            return "Unrecognized symbol";
+        case ErrorUnexpectedDigit:
+            return "Unexpected digit";
+        case ErrorUnexpectedLeftParen:
+            return "Unexpected `('";
+        case ErrorUnexpectedRightParen:
+            return "Unexpected `)'";
+        case ErrorNumberInvalid:
+            return "Invalid number";
+        case ErrorNumberOutOfRange:
+            return "Number is out of range";
+        default:
+            assert(false && "Undefined error");
+    }
+}
+
 void TrailParser::reset() {
     trail_.clear();
     coord_num_ = 0;
@@ -63,7 +116,7 @@ void TrailParser::space() {
         case StateReady:
         case StateError:
         case StateDone:
-        case StateExpectItemOrEnd:
+        case StateExpectItemOrTrailEnd:
         case StateExpectNumber:
         case StateExpectItemEnd:
             // do nothing
@@ -81,7 +134,7 @@ void TrailParser::digit(const char c) {
             break;
 
         case StateReady:
-        case StateExpectItemOrEnd:
+        case StateExpectItemOrTrailEnd:
         case StateExpectItemEnd:
             set_error(ErrorUnexpectedDigit);
             break;
@@ -96,10 +149,10 @@ void TrailParser::digit(const char c) {
 void TrailParser::paren_left() {
     switch (state_) {
         case StateReady:
-            state_ = StateExpectItemOrEnd;
+            state_ = StateExpectItemOrTrailEnd;
             break;
 
-        case StateExpectItemOrEnd:
+        case StateExpectItemOrTrailEnd:
             state_ = StateExpectNumber;
             break;
 
@@ -118,12 +171,12 @@ void TrailParser::paren_left() {
 
 void TrailParser::paren_right() {
     switch (state_) {
-        case StateExpectItemOrEnd:
+        case StateExpectItemOrTrailEnd:
             state_ = StateDone;
             break;
 
         case StateExpectItemEnd:
-            state_ = StateExpectItemOrEnd;
+            state_ = StateExpectItemOrTrailEnd;
             break;
 
         case StateReady:
@@ -158,7 +211,7 @@ void TrailParser::count(char c) {
 
 void TrailParser::complete_number() {
     // Parse number in buffer
-    auto number = Ant::Coord{};
+    auto number = Coord{};
     try {
         number = std::stoi(buffer_);
     } catch (const std::invalid_argument&) {
@@ -195,7 +248,7 @@ void TrailParser::complete_pos() {
     assert(state_ == StateExpectItemEnd);
     // Add position to trail
     trail_.insert(pos_);
-    state_ = StateExpectItemOrEnd;
+    state_ = StateExpectItemOrTrailEnd;
 }
 
 void TrailParser::set_error(TrailParser::Error error) {

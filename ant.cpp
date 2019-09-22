@@ -1,6 +1,20 @@
 #include "ant.hpp"
 #include <cassert>
 
+std::ostream& operator<<(std::ostream& os, const Trail& trail) {
+    os << '(';
+    auto it = trail.begin();
+    for (; it != trail.end();) {
+        auto pos = (*it);
+        os << '(' << pos.first << ' ' << pos.second << ')';
+        ++it;
+        if (it != trail.end())
+            os << ' ';
+    }
+    os << ')';
+    return os;
+}
+
 Ant::Ant()
     : Ant(Trail()) {}
 
@@ -49,13 +63,13 @@ bool Ant::is_food_ahead() const {
     assert(false);
 }
 
-Ant::Coord Ant::norm_x(Coord x) {
+Coord Ant::norm_x(Coord x) {
     Coord xn = x % MaxX;
     if (xn < 0) xn = MaxX + xn;
     return xn;
 }
 
-Ant::Coord Ant::norm_y(Coord y) {
+Coord Ant::norm_y(Coord y) {
     Coord yn = y % MaxY;
     if (yn < 0) yn = MaxY + yn;
     return yn;

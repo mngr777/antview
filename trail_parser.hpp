@@ -11,7 +11,7 @@ public:
         StateReady,
         StateError,
         StateDone,
-        StateExpectItemOrEnd,
+        StateExpectItemOrTrailEnd,
         StateExpectNumber,
         StateNumber,
         StateExpectItemEnd
@@ -29,16 +29,21 @@ public:
 
     TrailParser();
 
+    std::string::size_type parse(const std::string& s);
     void consume(const char c);
 
     void finish();
 
-    Ant::Trail result() {
+    Trail result() {
         return trail_;
     }
 
     bool is_done() {
         return state_ == StateDone;
+    }
+
+    bool is_error() {
+        return state_ == StateError;
     }
 
     Error error() {
@@ -74,8 +79,8 @@ private:
     void count(char c);
     void set_error(Error error);
 
-    Ant::Trail trail_;
-    Ant::Pos pos_;
+    Trail trail_;
+    Pos pos_;
     unsigned coord_num_;
     State state_;
     Error error_;
