@@ -6,7 +6,7 @@
 int main() {
     using namespace std;
 
-    std::string t1("((0 0) (1 2) (3 5))");
+    string t1("((0 0) (1 2) (3 5))");
 
     TrailParser tp1;
     cout << "Parsing trail: " << t1 << endl;

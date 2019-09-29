@@ -56,14 +56,26 @@ void SdlApp::init(const char* title, int width, int height) {
     is_running_ = ok;
 }
 
+void SdlApp::handle_events() {
+    SDL_Event event;
+    if (SDL_PollEvent(&event)) {
+        if (event.type != SDL_QUIT)  {
+            handle_event(event);
+        } else {
+            stop();
+        }
+    }
+}
+
 void SdlApp::render() {
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
     SDL_RenderClear(renderer_);
     do_render();
     SDL_RenderPresent(renderer_);
 }
 
 void SdlApp::cleanup() {
-     if (window_) SDL_DestroyWindow(window_);
+    if (window_) SDL_DestroyWindow(window_);
     if (renderer_) SDL_DestroyRenderer(renderer_);
     SDL_Quit();
 }

@@ -9,7 +9,11 @@ using Coord = int;
 using Pos = std::pair<Coord, Coord>;
 using Trail = std::set<Pos>;
 
+
 std::ostream& operator<<(std::ostream& os, const Trail& trail);
+std::ostream& operator<<(std::ostream& os, const Pos& pos);
+class Ant;
+std::ostream& operator<<(std::ostream& os, const Ant& ant);
 
 class Ant {
 public:

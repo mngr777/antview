@@ -1,6 +1,12 @@
 #include "texture_manager.hpp"
 #include <SDL2/SDL_image.h>
 
+#ifndef DATADIR
+# error DATADIR is not defined
+#endif
+
+const char DataDir[] = DATADIR;
+
 TextureManager::TextureManager() {}
 
 TextureManager::~TextureManager() {
@@ -9,12 +15,13 @@ TextureManager::~TextureManager() {
 }
 
 bool TextureManager::load(
+    SDL_Renderer* renderer,
     const std::string& id,
-    const std::string& filename,
-    SDL_Renderer* renderer)
+    const std::string& filename)
 {
     // Load image into to surface
-    SDL_Surface* surface = IMG_Load(filename.c_str());
+    std::string filepath = std::string(DataDir) + filename;
+    SDL_Surface* surface = IMG_Load(filepath.c_str());
     if (!surface)
         return false;
 
@@ -29,7 +36,7 @@ bool TextureManager::load(
         int width, height;
         SDL_QueryTexture(texture, nullptr, nullptr, &width, &height);
         // Add texture to map
-        texture_map_.emplace(id, texture, width, height);
+        texture_map_.emplace(id, TextureItem(texture, width, height));
         return true;
     } else {
         return false;
@@ -49,7 +56,7 @@ void TextureManager::draw(
     center.y = rect_src.h / 2;
     SDL_RenderCopyEx(
         renderer,
-        texture_map_[id].texture,
+        texture_map_.at(id).texture,
         &rect_src, &rect_dst,
         angle, &center,
         flip);
@@ -62,7 +69,7 @@ void TextureManager::draw(
     float angle,
     SDL_RendererFlip flip)
 {
-    auto texture_item = texture_map_[id];
+    auto texture_item = texture_map_.at(id);
     // Default source rect
     SDL_Rect rect_src;
     rect_src.x = rect_src.y = 0;

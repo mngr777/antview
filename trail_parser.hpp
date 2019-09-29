@@ -2,8 +2,18 @@
 #define ANTVIEW_TRAIL_PARSER_HPP_
 
 #include <cstddef>
+#include <istream>
+#include <stdexcept>
 #include <string>
 #include "ant.hpp"
+
+class TrailParser;
+
+class TrailParserException : public std::logic_error {
+public:
+    TrailParserException(const TrailParser& parser);
+};
+
 
 class TrailParser {
 public:
@@ -29,7 +39,8 @@ public:
 
     TrailParser();
 
-    std::string::size_type parse(const std::string& s);
+    std::size_t parse(const std::string& s);
+    std::size_t parse(std::istream& s);
     void consume(const char c);
 
     void finish();

@@ -1,17 +1,40 @@
 #include "ant.hpp"
 #include <cassert>
 
+static char dir_to_char(Ant::Dir dir) {
+    switch (dir) {
+        case Ant::N: return '^';
+        case Ant::E: return '>';
+        case Ant::S: return 'v';
+        case Ant::W: return '<';
+        default: assert(false);
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const Trail& trail) {
     os << '(';
     auto it = trail.begin();
     for (; it != trail.end();) {
-        auto pos = (*it);
-        os << '(' << pos.first << ' ' << pos.second << ')';
+        os << (*it);
         ++it;
         if (it != trail.end())
             os << ' ';
     }
     os << ')';
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Pos& pos) {
+    return os << '(' << pos.first << ' ' << pos.second << ')';
+}
+
+std::ostream& operator<<(std::ostream& os, const Ant& ant) {
+    os << dir_to_char(ant.dir())
+       << " (" << ant.x() << ", " << ant.y() << ") "
+       << "eaten: " << ant.eaten();
+    if (ant.is_food_ahead()) {
+        os << " food ahead";
+    }
     return os;
 }
 

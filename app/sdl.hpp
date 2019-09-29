@@ -15,12 +15,13 @@ public:
     void stop();
 
 protected:
-    virtual ~SdlApp() = 0;
+    virtual ~SdlApp() {};
 
     void init(const char* title, int width, int height);
+    void handle_events();
 
     virtual bool after_init() { return true; }
-    virtual void handle_events() = 0;
+    virtual void handle_event(const SDL_Event&) {};
     virtual void update() {}
 
     void render();

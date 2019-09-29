@@ -11,9 +11,9 @@ public:
     ~TextureManager();
 
     bool load(
+        SDL_Renderer* renderer,
         const std::string& id,
-        const std::string& filename,
-        SDL_Renderer* renderer);
+        const std::string& filename);
 
     void draw(
         SDL_Renderer* renderer,

@@ -1,6 +1,0 @@
-#ifndef ANTVIEW_APP_TRAILEDIT_HPP_
-#define ANTVIEW_APP_TRAILEDIT_HPP_
-
-
-
-#endif

@@ -1,7 +1,6 @@
 #include "trail_parser.hpp"
 #include <cassert>
 #include <cstring>
-#include <stdexcept>
 
 const char Space[] = " \t\r\n";
 const char Digits[] = "0123456789";
@@ -11,18 +10,38 @@ static bool is_digit(char c);
 static bool is_paren_left(char c);
 static bool is_paren_right(char c);
 
+static std::string state_message(const TrailParser& parser) {
+    return std::string("")
+        + "Parser state: " + parser.state_string() + "\n"
+        + "Parser error: " + parser.error_message() + "\n"
+        + "Position: line " + std::to_string(parser.line_num())
+        + " char "  + std::to_string(parser.char_num());
+}
+
+TrailParserException::TrailParserException(const TrailParser& parser)
+    : std::logic_error(state_message(parser)) {}
+
+
 TrailParser::TrailParser() {
     reset();
 }
 
-std::string::size_type TrailParser::parse(const std::string& s) {
-    std::string::size_type pos = 0;
-    for (; pos < s.size(); ++ pos) {
+std::size_t TrailParser::parse(const std::string& s) {
+    std::size_t pos = 0;
+    for (; pos < s.size(); ++pos) {
         consume(s[pos]);
         if (is_done() || is_error())
             break;
     }
     finish();
+    return pos;
+}
+
+std::size_t TrailParser::parse(std::istream& s) {
+    std::size_t pos = 0;
+    char c = '\0';
+    while (!is_done() && !is_error() && s.get(c))
+        consume(c);
     return pos;
 }
 
