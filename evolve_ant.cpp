@@ -84,11 +84,17 @@ int main(int argc, char** argv) {
     env.add_function("right", 0, &ant::right);
     env.add_function("progn2", 2, &ant::progn);
     env.add_function("progn3", 3, &ant::progn);
-    env.add_select_function("is-food-ahead", 0, 2, &ant::forward);
+    env.add_select_function("is-food-ahead", 2, 0, &ant::forward);
 
     // Initialize population
     Population pop_current = stree::gp::ramped_half_and_half<Individual>(
         env, PopulationSize, InitMaxDepth, InitPTermGrow, prng);
+    // TEST
+    for (Individual& individual : pop_current) {
+        std::cout << individual.tree() << std::endl
+                  << get_fitness(individual) << std::endl
+                  << std::endl;
+    }
 
     return 0;
 }
@@ -122,10 +128,10 @@ void evaluate(Individual& individual, const Trail& trail, unsigned step_limit) {
     stree::Params params;
     exec.init(&params, static_cast<stree::DataPtr>(&ant));
     unsigned step = 1;
-    while (ant.food_left() > 0 && step <= step_limit)
+    while (ant.food_left() > 0 && step++ <= step_limit)
         exec.step();
     // Set individual fitness
-    Fitness fitness = 1.0 - static_cast<float>(ant.food_left()) / trail.size();
+    Fitness fitness = static_cast<float>(ant.food_left()) / trail.size();
     individual.set_fitness(fitness);
 }
 
