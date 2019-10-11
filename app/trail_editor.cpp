@@ -1,5 +1,7 @@
 #include "trail_editor.hpp"
+#include <chrono>
 #include <iostream>
+#include <thread>
 #include "texture_manager.hpp"
 
 static const char FoodTextureId[] = "food";
@@ -24,6 +26,10 @@ void TrailEditorApp::handle_event(const SDL_Event& event) {
 void TrailEditorApp::do_render() {
     render_grid();
     render_trail();
+}
+
+void TrailEditorApp::after_render() {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
 bool TrailEditorApp::load_textures() {

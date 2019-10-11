@@ -72,6 +72,7 @@ void SdlApp::render() {
     SDL_RenderClear(renderer_);
     do_render();
     SDL_RenderPresent(renderer_);
+    after_render();
 }
 
 void SdlApp::cleanup() {

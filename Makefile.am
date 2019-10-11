@@ -7,7 +7,9 @@ SOURCES_COMMON = \
 	data.hpp \
 	data.cpp \
 	trail_parser.hpp \
-	trail_parser.cpp \
+	trail_parser.cpp
+
+SOURCES_SDL =  \
 	app/sdl.hpp \
 	app/sdl.cpp \
 	app/texture_manager.hpp \
@@ -17,9 +19,12 @@ dist_pkgdata_DATA = assets/ant.png assets/food.png
 
 
 # Programs
+bin_PROGRAMS = trail_editor evolve_ant
 
-bin_PROGRAMS = trail_editor
-trail_editor_SOURCES = $(SOURCES_COMMON) \
+# Editor
+trail_editor_SOURCES = \
+	$(SOURCES_COMMON) \
+	$(SOURCES_SDL) \
 	app/trail_editor.hpp \
 	app/trail_editor.cpp \
 	trail_editor.cpp
@@ -28,6 +33,14 @@ trail_editor_CXXFLAGS = \
 	-DDATADIR=\"$(datadir)/antview/\" \
 	-Wl,-rpath -Wl,$(prefix)/lib # ??
 
+# Evolution
+evolve_ant_SOURCES = \
+	$(SOURCES_COMMON) \
+	evolve_ant.cpp \
+	primitives.hpp \
+	primitives.cpp
+evolve_ant_LDADD = -lstree
+evolve_ant_CXXFLAGS = -Wl,-rpath -Wl,$(prefix)/lib
 
 # Tests
 

@@ -22,8 +22,8 @@ public:
     static Coord norm_x(Coord x);
     static Coord norm_y(Coord y);
 
-    static const Coord MaxX = 20;
-    static const Coord MaxY = 20;
+    static const Coord MaxX = 32;
+    static const Coord MaxY = 32;
 
     Ant();
     Ant(const Trail& trail);
@@ -47,8 +47,12 @@ public:
         return y_;
     }
 
-    unsigned eaten() const {
-        return eaten_;
+    unsigned food_eaten() const {
+        return food_eaten_;
+    }
+
+    unsigned food_left() const {
+        return trail_.size();
     }
 
     const Trail& trail() const {
@@ -64,7 +68,7 @@ private:
     Coord x_;
     Coord y_;
     Trail trail_;
-    unsigned eaten_;
+    unsigned food_eaten_;
 };
 
 #endif

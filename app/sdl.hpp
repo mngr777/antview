@@ -26,6 +26,7 @@ protected:
 
     void render();
     virtual void do_render() = 0;
+    virtual void after_render() {}
 
     void cleanup();
 
