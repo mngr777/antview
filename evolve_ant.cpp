@@ -99,8 +99,13 @@ int main(int argc, char** argv) {
     Population pop_current = stree::gp::ramped_half_and_half<Individual>(
         env, PopulationSize, InitMaxDepth, InitPTermGrow, prng);
 
+    stree::NodeManagerStats node_stats;
     bool done = false;
     do {
+        // Output stree stats
+        node_stats.update(env.node_manager());
+        std::cout << node_stats << std::endl;
+
         // Reap results
         Group best = stree::gp::reap<Individual>(pop_current, ResultNum, evaluator);
         done = stree::gp::is_goal_achieved<Individual>(best, FitnessGoal, evaluator)
