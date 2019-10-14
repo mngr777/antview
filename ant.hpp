@@ -55,6 +55,10 @@ public:
         return trail_.size();
     }
 
+    unsigned action_num() const {
+        return action_num_;
+    }
+
     const Trail& trail() const {
         return trail_;
     }
@@ -69,6 +73,7 @@ private:
     Coord y_;
     Trail trail_;
     unsigned food_eaten_;
+    unsigned action_num_;
 };
 
 #endif

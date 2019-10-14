@@ -31,7 +31,8 @@ std::ostream& operator<<(std::ostream& os, const Pos& pos) {
 std::ostream& operator<<(std::ostream& os, const Ant& ant) {
     os << dir_to_char(ant.dir())
        << " (" << ant.x() << ", " << ant.y() << ") "
-       << "eaten: " << ant.food_eaten();
+       << "eaten: " << ant.food_eaten() << " "
+       << "actions: " << ant.action_num();
     if (ant.is_food_ahead()) {
         os << " food ahead";
     }
@@ -46,9 +47,13 @@ Ant::Ant(const Trail& trail)
 
 Ant::Ant(Dir dir, Coord x, Coord y, const Trail& trail)
     : dir_(dir), x_(x), y_(y),
-      trail_(trail), food_eaten_(0) {}
+      trail_(trail), food_eaten_(0)
+{
+    eat();
+}
 
 void Ant::forward() {
+    ++action_num_;
     switch (dir_) {
         case N: y_ = norm_y(y_ - 1); break;
         case E: x_ = norm_y(x_ + 1); break;
@@ -59,6 +64,7 @@ void Ant::forward() {
 }
 
 void Ant::left() {
+    ++action_num_;
     switch (dir_) {
         case N: dir_ = W; break;
         case W: dir_ = S; break;
@@ -68,6 +74,7 @@ void Ant::left() {
 }
 
 void Ant::right() {
+    ++action_num_;
     switch (dir_) {
         case N: dir_ = E; break;
         case E: dir_ = S; break;

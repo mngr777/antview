@@ -17,9 +17,11 @@ SOURCES_SDL =  \
 
 dist_pkgdata_DATA = assets/ant.png assets/food.png
 
+LIBS_SDL = -lSDL2 -lSDL2_image
+
 
 # Programs
-bin_PROGRAMS = trail_editor evolve_ant
+bin_PROGRAMS = trail_editor evolve_ant ant_viewer
 
 # Editor
 trail_editor_SOURCES = \
@@ -28,8 +30,22 @@ trail_editor_SOURCES = \
 	app/trail_editor.hpp \
 	app/trail_editor.cpp \
 	trail_editor.cpp
-trail_editor_LDADD = -lstree -lSDL2 -lSDL2_image
+trail_editor_LDADD = -lstree $(LIBS_SDL)
 trail_editor_CXXFLAGS = \
+	-DDATADIR=\"$(datadir)/antview/\" \
+	-Wl,-rpath -Wl,$(prefix)/lib # ??
+
+# Viewer
+ant_viewer_SOURCES = \
+	$(SOURCES_COMMON) \
+	$(SOURCES_SDL) \
+	app/ant_viewer.hpp \
+	app/ant_viewer.cpp \
+	primitives.hpp \
+	primitives.cpp \
+	ant_viewer.cpp
+ant_viewer_LDADD = -lstree $(LIBS_SDL)
+ant_viewer_CXXFLAGS = \
 	-DDATADIR=\"$(datadir)/antview/\" \
 	-Wl,-rpath -Wl,$(prefix)/lib # ??
 
