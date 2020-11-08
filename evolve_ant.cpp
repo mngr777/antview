@@ -49,16 +49,16 @@ int main(int argc, char** argv) {
         config.set<unsigned>(conf::PrngSeed, std::rand());
     }
 
-    std::cout << "PRNG seed           = "
+    std::cout << "PRNG seed              = "
               << config.get<unsigned>(conf::PrngSeed)
               << std::endl;
-    std::cout << "# of crossovers     = "
+    std::cout << "# of crossovers        = "
               << config.get<unsigned>(conf::CrossoverNum)
               << std::endl;
-    std::cout << "# of mutations      = "
+    std::cout << "# of mutations         = "
               << config.get<unsigned>(conf::MutationNum)
               << std::endl;
-    std::cout << "# of reproductions  = "
+    std::cout << "# of reproductions     = "
               << config.get<unsigned>(conf::ReproductionNum)
               << std::endl;
     std::cout << "# of subtree mutations = "
