@@ -38,7 +38,7 @@ int main() {
     cout << "Ant program: " << tree << endl;
 
     // Make exec
-    stree::Exec exec(tree);
+    stree::Exec exec(tree, stree::Exec::FlagRunLoop | stree::Exec::FlagStopIfCostNotZero);
     stree::Params params;
     exec.init(&params, static_cast<stree::DataPtr>(&ant));
 

@@ -59,10 +59,11 @@ evolve_ant_LDADD = $(LIBS_STREE)
 evolve_ant_CXXFLAGS = -Wl,-rpath -Wl,$(prefix)/lib
 
 # Tests
-
-check_PROGRAMS = \
+TESTS = \
 	test_trail_parser1 \
 	test_ant1
+
+check_PROGRAMS = $(TESTS)
 
 test_trail_parser1_SOURCES = tests/trail_parser1.cpp \
 	ant.hpp ant.cpp \
