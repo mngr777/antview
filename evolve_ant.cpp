@@ -33,83 +33,79 @@ struct Evaluator {
 };
 
 int main(int argc, char** argv) {
-    const unsigned GenerationMax = 20;
-    const Fitness FitnessGoal = 0.0;
-    const unsigned TournamentSize = 10;
-    const unsigned ResultNum = 10;
-
-    /// Evaluation
-    const unsigned StepLimit = 600;
-
-    /// Initialization
-    const unsigned PopulationSize = 100;
-    const unsigned InitMaxDepth = 5;
-    const float InitPTermGrow = 0.1;
-
-    /// Crossover
-    const unsigned CrossoverNum = 60;
-    const unsigned CrossoverPTerm = 0.1;
-
-    /// Mutation
-    const unsigned MutationNum = 15;
-
-    // Subtree mutation
-    const unsigned MutationSubtreeNum = MutationNum / 3;
-    const unsigned MutationSubtreeDepth = 3;
-    const float MutationSubtreePTerm = 0.1;
-    const float MutationSubtreePTermGrow = 0.1;
-
-    // Point mutation
-    const unsigned MutationPointNum = MutationNum / 3;
-    const float MutationPointPTerm = 0.1;
-
-    // Hoist mutation
-    assert(MutationNum >= MutationSubtreeNum + MutationPointNum);
-    const unsigned MutationHoistNum = MutationNum
-        - (MutationSubtreeNum + MutationPointNum);
-    const unsigned MutationHoistPTerm = 0.1;
-
-    assert(PopulationSize >= CrossoverNum + MutationNum);
-
-
     // Load trail
-    if (argc < 2)
+    if (argc < 1)
         usage(argv[0]);
     Trail trail = load_trail_or_exit(argv[1]);
 
-    // Evaluator
-    Evaluator evaluator(trail, StepLimit);
+    // Load config
+    auto config = (argc < 3)
+        ? make_default_config()
+        : load_config(argv[2]);
+
+    // Fallback to random value if PRNG seed is not provided
+    if (config.get<unsigned>(conf::PrngSeed) == (unsigned) -1) {
+        std::srand(std::time(nullptr));
+        config.set<unsigned>(conf::PrngSeed, std::rand());
+    }
+
+    std::cout << "PRNG seed           = "
+              << config.get<unsigned>(conf::PrngSeed)
+              << std::endl;
+    std::cout << "# of crossovers     = "
+              << config.get<unsigned>(conf::CrossoverNum)
+              << std::endl;
+    std::cout << "# of mutations      = "
+              << config.get<unsigned>(conf::MutationNum)
+              << std::endl;
+    std::cout << "# of reproductions  = "
+              << config.get<unsigned>(conf::ReproductionNum)
+              << std::endl;
+    std::cout << "# of subtree mutations = "
+              << config.get<unsigned>(conf::MutationSubtreeNum)
+              << std::endl;
+    std::cout << "# of point mutations   = "
+              << config.get<unsigned>(conf::MutationPointNum)
+              << std::endl;
+    std::cout << "# of hoist mutations   = "
+              << config.get<unsigned>(conf::MutationHoistNum)
+              << std::endl;
 
     // Random engine
-    const unsigned PrngSeed = 1;
+    auto PrngSeed = config.get<unsigned>(conf::PrngSeed);
     std::mt19937 prng(PrngSeed);
+
+    // Evaluator
+    Evaluator evaluator(trail, config.get<unsigned>(conf::StepLimit));
 
     // Initialize environment
     stree::Environment env;
-    env.add_function("forward", 0, &ant::forward);
-    env.add_function("left", 0, &ant::left);
-    env.add_function("right", 0, &ant::right);
-    env.add_function("progn2", 2, &ant::progn);
-    env.add_function("progn3", 3, &ant::progn);
-    env.add_select_function("is-food-ahead", 2, 0, &ant::forward);
+    init_environment(env);
+
+    // initialize GP context
+    auto context = stree::gp::make_context<Individual>(
+        config, env, evaluator, prng);
 
     // Initialize population
     unsigned generation = 0;
     std::cout << "Generation 0" << std::endl;
-    Population pop_current = stree::gp::ramped_half_and_half<Individual>(
-        env, PopulationSize, InitMaxDepth, InitPTermGrow, prng);
+    Population pop_current = stree::gp::ramped_half_and_half(context);
 
     stree::NodeManagerStats node_stats;
     bool done = false;
     do {
         // Output stree stats
-        node_stats.update(env.node_manager());
-        std::cout << node_stats << std::endl;
+        if (config.get<unsigned>(conf::ShowNodeStats)) {
+            node_stats.update(env.node_manager());
+            std::cout << node_stats << std::endl;
+        }
 
         // Reap results
-        Group best = stree::gp::reap<Individual>(pop_current, ResultNum, evaluator);
-        done = stree::gp::is_goal_achieved<Individual>(best, FitnessGoal, evaluator)
-            || generation == GenerationMax;
+        Group best = stree::gp::reap<Individual>(
+            pop_current, config.get<unsigned>(conf::ResultNum), evaluator);
+        done = (generation == config.get<unsigned>(conf::GenerationMax))
+            || stree::gp::is_goal_achieved<Individual>(
+                best, config.get<float>(conf::FitnessGoal), evaluator);
         if (done) {
             std::cout << "Best results" << std::endl;
             for (auto item : best) {
@@ -136,70 +132,41 @@ int main(int argc, char** argv) {
             unsigned index = 0, max_index = 0;
 
             /// Crossover
-            max_index += CrossoverNum;
+            max_index += config.get<unsigned>(conf::CrossoverNum);
             for (; index < max_index; ++index) {
                 // Select parents
-                Individual& parent1 = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                Individual& parent2 = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                // Apply crossover
-                // stree::Tree child = stree::gp::crossover_one_point(
-                //     parent1.tree(),
-                //     parent2.tree(),
-                //     CrossoverPTerm,
-                //     prng);
-                stree::Tree child = stree::gp::crossover_random(
-                    parent1.tree(),
-                    parent2.tree(),
-                    CrossoverPTerm,
-                    prng);
+                const auto& parent1 = stree::gp::selection_tournament(context, pop_current);
+                const auto& parent2 = stree::gp::selection_tournament(context, pop_current);
+                Individual child = stree::gp::crossover_random(context, parent1, parent2);
+
                 // Add child
                 pop_next.emplace_back(std::move(child));
             }
 
             /// Mutation
             // Random subtree mutation
-            max_index += MutationSubtreeNum;
+            max_index += config.get<unsigned>(conf::MutationSubtreeNum);
             for (; index < max_index; ++index) {
-                Individual& individual = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                pop_next.emplace_back(
-                    stree::gp::mutate_subtree(
-                        individual.tree(),
-                        MutationSubtreeDepth,
-                        MutationSubtreePTerm,
-                        MutationSubtreePTermGrow,
-                        prng));
+                const auto& individual = stree::gp::selection_tournament(context, pop_current);
+                pop_next.emplace_back(stree::gp::mutate_subtree(context, individual));
             }
             // Point mutation
-            max_index += MutationPointNum;
+            max_index += config.get<unsigned>(conf::MutationPointNum);
             for (; index < max_index; ++index) {
-                Individual& individual = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                pop_next.emplace_back(
-                    stree::gp::mutate_point(
-                        individual.tree(),
-                        MutationPointPTerm,
-                        prng));
+                Individual& individual = stree::gp::selection_tournament(context, pop_current);
+                pop_next.emplace_back(stree::gp::mutate_point(context, individual));
             }
             // Hoist mutation
-            max_index += MutationHoistNum;
+            max_index += config.get<unsigned>(conf::MutationHoistNum);
             for (; index < max_index; ++index) {
-                Individual& individual = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                pop_next.emplace_back(
-                    stree::gp::mutate_hoist(
-                        individual.tree(),
-                        MutationHoistPTerm,
-                        prng));
+                const auto& individual = stree::gp::selection_tournament(context, pop_current);
+                pop_next.emplace_back(stree::gp::mutate_hoist(context, individual));
             }
 
             /// Reproduction
             while (pop_next.size() < pop_current.size()) {
-                Individual& individual = stree::gp::selection_tournament<Individual>(
-                    pop_current, TournamentSize, prng, evaluator);
-                pop_next.emplace_back(individual.tree().sub(0).copy());
+                const auto& individual = stree::gp::selection_tournament(context, pop_current);
+                pop_next.emplace_back(individual.copy());
             }
 
             /// Swap populations
@@ -214,7 +181,7 @@ int main(int argc, char** argv) {
 void usage(const std::string& name) {
     using namespace std;
     cout << "Usage:" << endl
-         << name << " <trail-filename>" << endl;
+         << name << " <trail-filename> [<config-filename>]" << endl;
     exit(-1);
 }
 
@@ -232,16 +199,22 @@ Trail load_trail_or_exit(const std::string& filename) {
 }
 
 Fitness evaluate(Individual& individual, const Trail& trail, unsigned step_limit) {
+    using namespace stree;
+
     // Make ant
     Ant ant(trail);
     // Run program
-    stree::Exec exec(individual.tree());
-    stree::Params params;
-    exec.init(&params, static_cast<stree::DataPtr>(&ant));
-    unsigned step = 1;
-    while (ant.food_left() > 0 && step++ <= step_limit)
-        exec.step();
-    // Set individual fitness
+    Exec exec(
+        individual.tree(),
+        Exec::FlagRunLoop | Exec::FlagStopIfCostNotZero);
+    Params params;
+    exec.init(&params, static_cast<DataPtr>(&ant));
+    exec.set_cost_limit(600);
+    try {
+        exec.run();
+    } catch (ExecCostLimitExceeded& e) {
+        // do nothing
+    }
     return static_cast<float>(ant.food_left()) / trail.size();
 }
 

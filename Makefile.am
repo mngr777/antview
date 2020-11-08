@@ -18,7 +18,7 @@ SOURCES_SDL =  \
 dist_pkgdata_DATA = assets/ant.png assets/food.png
 
 LIBS_SDL = -lSDL2 -lSDL2_image
-
+LIBS_STREE = -lstree -lstreegp
 
 # Programs
 bin_PROGRAMS = trail_editor evolve_ant ant_viewer
@@ -30,7 +30,7 @@ trail_editor_SOURCES = \
 	app/trail_editor.hpp \
 	app/trail_editor.cpp \
 	trail_editor.cpp
-trail_editor_LDADD = -lstree $(LIBS_SDL)
+trail_editor_LDADD = $(LIBS_STREE) $(LIBS_SDL)
 trail_editor_CXXFLAGS = \
 	-DDATADIR=\"$(datadir)/antview/\" \
 	-Wl,-rpath -Wl,$(prefix)/lib # ??
@@ -44,7 +44,7 @@ ant_viewer_SOURCES = \
 	primitives.hpp \
 	primitives.cpp \
 	ant_viewer.cpp
-ant_viewer_LDADD = -lstree $(LIBS_SDL)
+ant_viewer_LDADD = $(LIBS_STREE) $(LIBS_SDL)
 ant_viewer_CXXFLAGS = \
 	-DDATADIR=\"$(datadir)/antview/\" \
 	-Wl,-rpath -Wl,$(prefix)/lib # ??
@@ -55,7 +55,7 @@ evolve_ant_SOURCES = \
 	evolve_ant.cpp \
 	primitives.hpp \
 	primitives.cpp
-evolve_ant_LDADD = -lstree
+evolve_ant_LDADD = $(LIBS_STREE)
 evolve_ant_CXXFLAGS = -Wl,-rpath -Wl,$(prefix)/lib
 
 # Tests
@@ -72,5 +72,5 @@ test_ant1_SOURCES = tests/ant1.cpp \
 	ant.hpp ant.cpp \
 	primitives.hpp primitives.cpp \
 	trail_parser.hpp trail_parser.cpp
-test_ant1_LDADD = -lstree
+test_ant1_LDADD = $(LIBS_STREE)
 test_ant1_CXXFLAGS = -Wl,-rpath -Wl,$(prefix)/lib # ??

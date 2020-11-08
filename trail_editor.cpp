@@ -3,6 +3,7 @@
 #include "app/trail_editor.hpp"
 #include "ant.hpp"
 #include "data.hpp"
+#include "trail_parser.hpp"
 
 static Trail load_trail_or_exit(const std::string& filename);
 
@@ -17,7 +18,7 @@ int main(int argc, char** argv) {
 Trail load_trail_or_exit(const std::string& filename) {
     try {
         return load_trail(filename);
-    } catch (std::exception& e) {
+    } catch (TrailParserException& e) {
         std::cerr << e.what() << std::endl;
         std::exit(-1);
     }

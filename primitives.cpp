@@ -8,9 +8,9 @@ static Ant* ant_ptr(stree::DataPtr ant) {
 }
 
 void init_environment(stree::Environment& env) {
-    env.add_function("forward", 0, ant::forward);
-    env.add_function("left", 0, ant::left);
-    env.add_function("right", 0, ant::right);
+    env.add_function("forward", 0, ant::forward, 1);
+    env.add_function("left", 0, ant::left, 1);
+    env.add_function("right", 0, ant::right, 1);
     env.add_function("progn2", 2, ant::progn);
     env.add_function("progn3", 3, ant::progn);
     env.add_select_function("if-food-ahead", 2, 0, ant::if_food_ahead);

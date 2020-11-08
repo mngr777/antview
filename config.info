@@ -1,0 +1,35 @@
+population_size 10000
+p_term_default 0.1
+show_node_stats 0
+prng_seed -1
+generation_max 40
+fitness_goal 0
+result_num 10
+step_limit 600
+init
+{
+    max_depth_default 5
+}
+selection
+{
+    tournament_size 3
+}
+mutation_num 20
+mutation_percent 0
+mutation_subtree_num 0
+mutation_point_num 0
+mutation_hoist_num 0
+mutation_subtree_percent 100
+mutation_point_percent 0
+mutation_hoist_percent 0
+mutation
+{
+    subtree
+    {
+        depth 5
+    }
+}
+crossover_num 0
+crossover_percent 80
+reproduction_percent 0
+reproduction_num 0

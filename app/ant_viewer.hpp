@@ -19,6 +19,7 @@ public:
 
     void reset();
     void step();
+    void print_backtrace();
 
     void set_trail(Trail trail);
     void set_tree(stree::Tree&& tree);
@@ -28,6 +29,8 @@ protected:
     virtual void handle_event(const SDL_Event& event);
     virtual void do_render();
     virtual void after_render();
+
+    void on_keydown(const SDL_KeyboardEvent& event);
 
     bool load_textures();
     void render_grid();
@@ -39,6 +42,7 @@ protected:
 
     std::unique_ptr<stree::Exec> exec_;
     stree::Tree tree_;
+    stree::Params params_;
     Ant ant_;
     Trail trail_;
 

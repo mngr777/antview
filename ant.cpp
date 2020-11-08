@@ -47,7 +47,7 @@ Ant::Ant(const Trail& trail)
 
 Ant::Ant(Dir dir, Coord x, Coord y, const Trail& trail)
     : dir_(dir), x_(x), y_(y),
-      trail_(trail), food_eaten_(0)
+      trail_(trail), food_eaten_(0), action_num_(0)
 {
     eat();
 }

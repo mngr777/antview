@@ -19,6 +19,14 @@ void AntViewerApp::step() {
     }
 }
 
+void AntViewerApp::print_backtrace() {
+    if (exec_) {
+        stree::ExecDebug debug(*exec_);
+        debug.print_backtrace(std::cout);
+        std::cout << std::endl;
+    }
+}
+
 void AntViewerApp::set_trail(Trail trail) {
     trail_ = std::move(trail);
     reset();
@@ -26,8 +34,12 @@ void AntViewerApp::set_trail(Trail trail) {
 
 void AntViewerApp::set_tree(stree::Tree&& tree) {
     tree_.swap(std::move(tree));
-    exec_.reset(new stree::Exec(tree_));
-    exec_->init(nullptr, &ant_);
+    exec_.reset(
+        new stree::Exec(
+            tree_,
+            stree::Exec::FlagStopIfCostNotZero));
+    exec_->init(&params_, &ant_);
+    exec_->set_cost_limit(0);
     reset();
 }
 
@@ -38,8 +50,7 @@ bool AntViewerApp::after_init() {
 void AntViewerApp::handle_event(const SDL_Event& event) {
     switch (event.type) {
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_SPACE)
-                step();
+            on_keydown(event.key);
             break;
     }
 }
@@ -52,6 +63,18 @@ void AntViewerApp::do_render() {
 
 void AntViewerApp::after_render() {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
+}
+
+void AntViewerApp::on_keydown(const SDL_KeyboardEvent& event) {
+    switch (event.keysym.sym) {
+        case SDLK_SPACE:
+            step();
+            break;
+        case SDLK_b:
+            print_backtrace();
+            break;
+
+    }
 }
 
 bool AntViewerApp::load_textures() {

@@ -1,10 +1,12 @@
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 #include <stree/stree.hpp>
 #include "app/ant_viewer.hpp"
 #include "ant.hpp"
 #include "data.hpp"
 #include "primitives.hpp"
+#include "trail_parser.hpp"
 
 static void usage(const std::string& name);
 
@@ -21,12 +23,7 @@ int main(int argc, char** argv) {
 
     // Initialize environment
     stree::Environment env;
-    env.add_function("forward", 0, &ant::forward);
-    env.add_function("left", 0, &ant::left);
-    env.add_function("right", 0, &ant::right);
-    env.add_function("progn2", 2, &ant::progn);
-    env.add_function("progn3", 3, &ant::progn);
-    env.add_select_function("is-food-ahead", 2, 0, &ant::forward);
+    init_environment(env);
 
     // Load data
     stree::Tree tree(load_tree_or_exit(env, argv[1]));
@@ -51,7 +48,7 @@ void usage(const std::string& name) {
 Trail load_trail_or_exit(const std::string& filename) {
     try {
         return load_trail(filename);
-    } catch (std::exception& e) {
+    } catch (TrailParserException& e) {
         std::cerr << e.what() << std::endl;
         std::exit(-1);
     }
@@ -64,7 +61,7 @@ stree::Tree load_tree_or_exit(
 {
     try {
         return load_tree(env, filename);
-    } catch (std::exception& e) {
+    } catch (stree::ParserError& e) {
         std::cerr << e.what() << std::endl;
         std::exit(-1);
     }
