@@ -34,7 +34,7 @@ struct Evaluator {
 
 int main(int argc, char** argv) {
     // Load trail
-    if (argc < 1)
+    if (argc < 2)
         usage(argv[0]);
     Trail trail = load_trail_or_exit(argv[1]);
 
@@ -89,7 +89,8 @@ int main(int argc, char** argv) {
     // Initialize population
     unsigned generation = 0;
     std::cout << "Generation 0" << std::endl;
-    Population pop_current = stree::gp::ramped_half_and_half(context);
+    Population pop_current;
+    stree::gp::ramped_half_and_half(context, pop_current);
 
     stree::NodeManagerStats node_stats;
     bool done = false;
